@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VELOCE — Electric Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #05070c; }
+  body { font-family: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif; }
+  /* 4 modos (100vh) + 3 transiciones (100vh) = 700vh de scroll (patrón reloj) */
+  .scroll-space { height: 700vh; }
+
+  /* ===== Fondo ===== */
+  #bg {
+    position: fixed; inset: 0; z-index: 0;
+    background: #0d1420;
+    transition: background 0.8s ease;
+  }
+
+  /* ===== Video de fondo (auto futurista) ===== */
+  #bgVideo {
+    position: fixed; inset: 0; z-index: 1;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.55;
+    filter: saturate(1.2) contrast(1.05);
+    pointer-events: none;
+  }
+  #bgOverlay {
+    position: fixed; inset: 0; z-index: 2;
+    background: linear-gradient(180deg, rgba(5,7,12,0.55) 0%, rgba(5,7,12,0.35) 50%, rgba(5,7,12,0.75) 100%);
+    pointer-events: none;
+  }
+
+  /* ===== Logo (liquid glass) ===== */
+  .logo {
+    position: fixed; top: 26px; left: 40px; z-index: 40;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 17px; letter-spacing: 5px; text-transform: uppercase;
+    color: #fff; font-weight: 700;
+    padding: 12px 22px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04));
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.22);
+    pointer-events: none;
+  }
+  .logo small {
+    display: block; font-family: 'Space Grotesk', sans-serif;
+    font-size: 9px; letter-spacing: 3px; opacity: 0.65; font-weight: 400;
+  }
+
+  /* ===== Canvas de desfragmentación ===== */
+  #morphCanvas {
+    position: fixed; inset: 0; z-index: 5;
+    width: 100%; height: 100%; object-fit: cover;
+    opacity: 0; transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  /* ===== Modo: título + auto ===== */
+  .mode {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.6s ease;
+    pointer-events: none;
+  }
+  .mode.visible { opacity: 1; }
+
+  .mode h1 {
+    position: absolute; top: 8%;
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(46px, 8.5vw, 124px);
+    font-weight: 900; color: #fff; letter-spacing: 0.06em;
+    text-shadow: 0 0 60px var(--accent, #4fc3f7), 0 2px 30px rgba(0,0,0,0.5);
+    text-align: center; width: 100%;
+  }
+  .mode .sub {
+    position: absolute; top: calc(8% + clamp(58px, 9.5vw, 140px));
+    font-size: clamp(11px, 1.3vw, 16px);
+    letter-spacing: 0.55em; text-transform: uppercase;
+    color: var(--accent, #4fc3f7); text-align: center; width: 100%;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+  }
+  .mode .car-img {
+    max-width: min(62vw, 860px);
+    max-height: 42vh;
+    filter: drop-shadow(0 30px 50px rgba(0,0,0,0.55));
+    object-fit: contain;
+  }
+  .mode .speed-line {
+    position: absolute; bottom: 24%; left: 50%; transform: translateX(-50%);
+    width: 50%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent, #4fc3f7), transparent);
+    opacity: 0.4; animation: speedPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes speedPulse { 0%,100% { opacity: 0.15; } 50% { opacity: 0.7; } }
+
+  /* ===== Specs (liquid glass panel) ===== */
+  .specs {
+    position: fixed; bottom: 34px; left: 40px; z-index: 40;
+    color: rgba(255,255,255,0.92); font-size: 11px; letter-spacing: 1.5px; line-height: 2.2;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  .specs b { color: var(--accent, #4fc3f7); font-weight: 600; }
+
+  /* ===== Nav inferior (liquid glass pills) ===== */
+  .nav-bottom {
+    position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px; z-index: 40;
+    padding: 8px 10px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 40px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .nav-bottom span {
+    color: rgba(255,255,255,0.6); font-size: 12px;
+    letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+    padding: 10px 16px; border-radius: 30px;
+    transition: all 0.3s;
+    font-weight: 500;
+  }
+  .nav-bottom span:hover { color: #fff; background: rgba(255,255,255,0.08); }
+  .nav-bottom span.active {
+    color: #05070c; font-weight: 700;
+    background: var(--accent, #4fc3f7);
+    box-shadow: 0 0 24px var(--accent, #4fc3f7), 0 4px 14px rgba(0,0,0,0.3);
+  }
+
+  /* scroll hint (liquid glass) */
+  .scroll-hint {
+    position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.4); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    z-index: 40; animation: hintFloat 2s ease-in-out infinite;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 20px;
+  }
+  @keyframes hintFloat { 0%,100% { opacity: 0.3; transform: translateX(-50%) translateY(0); } 50% { opacity: 0.8; transform: translateX(-50%) translateY(-4px); } }
+
+  /* ===== Responsive completo ===== */
+  /* Tablets (768-1024) */
+  @media (max-width: 1024px) and (min-width: 701px) {
+    .mode h1 { font-size: clamp(42px, 8vw, 90px); }
+    .mode .car-img { max-width: 62vw; max-height: 38vh; }
+    .logo { padding: 10px 18px; font-size: 15px; }
+  }
+
+  /* Móviles (≤700) */
+  @media (max-width: 700px) {
+    .logo { left: 16px; top: 14px; font-size: 12px; padding: 8px 14px; letter-spacing: 3px; }
+    .logo small { font-size: 7px; letter-spacing: 2px; }
+    .mode h1 {
+      top: 6%;
+      font-size: clamp(34px, 10.5vw, 58px);
+      letter-spacing: 0.04em;
+      text-shadow: 0 0 40px var(--accent);
+    }
+    .mode .sub {
+      top: calc(6% + clamp(42px, 12vw, 66px));
+      font-size: clamp(9px, 2.6vw, 12px);
+      letter-spacing: 0.35em;
+    }
+    .mode .car-img {
+      max-width: 88vw;
+      max-height: 28vh;
+    }
+    .mode .speed-line { bottom: 26%; width: 60%; }
+    .nav-bottom {
+      gap: 4px; bottom: 22px;
+      padding: 6px 6px; width: max-content; max-width: 96vw;
+    }
+    .nav-bottom span {
+      font-size: 8px; padding: 7px 9px; letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    .specs {
+      left: 14px; bottom: 74px;
+      font-size: 8px; padding: 8px 12px; line-height: 1.9;
+    }
+    .scroll-hint { bottom: 86px; font-size: 8px; padding: 6px 12px; }
+  }
+
+  /* Móviles pequeños (≤400) */
+  @media (max-width: 400px) {
+    .mode h1 { font-size: clamp(28px, 9.5vw, 42px); }
+    .nav-bottom { gap: 2px; }
+    .nav-bottom span { font-size: 7px; padding: 6px 7px; }
+    .specs { font-size: 7px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+
+<!-- Video de fondo (auto futurista cian, 15s loop) -->
+<video id="bgVideo" autoplay muted loop playsinline preload="auto">
+  <source src="/public/background.mp4" type="video/mp4">
+</video>
+<div id="bgOverlay"></div>
+
+<div class="logo">VELOCE<br><small>ELECTRIC PERFORMANCE</small></div>
+
+<!-- Canvas de desfragmentación (frames del video, patrón reloj) -->
+<canvas id="morphCanvas"></canvas>
+
+<!-- ===== MODOS ===== -->
+<section class="mode" data-mode="0" style="--accent:#4fc3f7;">
+  <h1>URBAN</h1>
+  <div class="sub">City Range · 480 km</div>
+  <img class="car-img" src="/public/cars/urban.png" alt="Urban">
+  <div class="speed-line"></div>
+</section>
+
+<section class="mode" data-mode="1" style="--accent:#ff5252;">
+  <h1>PERFORMANCE</h1>
+  <div class="sub">Sport · 0-100 en 3.2s</div>
+  <img class="car-img" src="/public/cars/performance.png" alt="Performance">
+  <div class="speed-line"></div>
+</section>
+
+<section class="mode" data-mode="2" style="--accent:#69f0ae;">
+  <h1>AUTONOMY</h1>
+  <div class="sub">Self-driving · 620 km</div>
+  <img class="car-img" src="/public/cars/autonomy.png" alt="Autonomy">
+  <div class="speed-line"></div>
+</section>
+
+<section class="mode" data-mode="3" style="--accent:#ffb300;">
+  <h1>RACE</h1>
+  <div class="sub">Track · 0-100 en 2.1s</div>
+  <img class="car-img" src="/public/cars/race.png" alt="Race">
+  <div class="speed-line"></div>
+</section>
+
+<!-- ===== Overlays fijos ===== -->
+<div class="nav-bottom" id="navBottom">
+  <span data-mode="0">Urban</span>
+  <span data-mode="1">Performance</span>
+  <span data-mode="2">Autonomy</span>
+  <span data-mode="3">Race</span>
+</div>
+
+<div class="specs" id="specs">
+  <b>0-100:</b> <span id="sp0">4.9s</span><br>
+  <b>Rango:</b> <span id="sp1">480 km</span><br>
+  <b>Potencia:</b> <span id="sp2">320 kW</span>
+</div>
+<div class="scroll-hint">Desliza para conducir ↓</div>
+
+<div class="scroll-space"></div>
+
+<script>
+(function () {
+  // ===== Config (patrón reloj) =====
+  const MODES = [
+    { bg: '#0d1420', accent: '#4fc3f7', specs: ['4.9s', '480 km', '320 kW'] },
+    { bg: '#160d14', accent: '#ff5252', specs: ['3.2s', '410 km', '480 kW'] },
+    { bg: '#0d1a12', accent: '#69f0ae', specs: ['5.6s', '620 km', '280 kW'] },
+    { bg: '#1a0d0d', accent: '#ffb300', specs: ['2.1s', '350 km', '680 kW'] }
+  ];
+  const MODE_H = 100;
+  const TRANS_H = 100;
+  const TOTAL_MODES = 4;
+  function modeStartVh(i) { return i * (MODE_H + TRANS_H); }
+
+  const bg = document.getElementById('bg');
+  const canvas = document.getElementById('morphCanvas');
+  const ctx = canvas.getContext('2d');
+  const modes = [...document.querySelectorAll('.mode')];
+  const navSpans = [...document.querySelectorAll('.nav-bottom span')];
+  const specsEl = document.getElementById('specs');
+
+  // ===== Cargar frames (120 imágenes del video) =====
+  const FRAME_COUNT = 120;
+  const images = [];
+  for (let i = 1; i <= FRAME_COUNT; i++) {
+    const img = new Image();
+    const n = String(i).padStart(3, '0');
+    img.src = `/public/frames/frame_${n}.jpg`;
+    images.push(img);
+  }
+
+  // ===== Render según scroll =====
+  function render(scrollY) {
+    const vh = window.innerHeight;
+    const vhPos = scrollY / vh * 100;
+    const tramo = Math.floor(vhPos / (MODE_H + TRANS_H));
+    const dentro = vhPos % (MODE_H + TRANS_H);
+    const isTransition = dentro >= MODE_H;
+    let currentMode = Math.min(tramo, TOTAL_MODES - 1);
+
+    if (isTransition && currentMode < TOTAL_MODES - 1) {
+      const progress = (dentro - MODE_H) / TRANS_H;
+      const frameIdx = Math.min(FRAME_COUNT - 1, Math.floor(progress * FRAME_COUNT));
+      if (images[frameIdx] && images[frameIdx].complete) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const img = images[frameIdx];
+        const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+        const w = img.width * scale, h = img.height * scale;
+        ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+      }
+      canvas.style.opacity = 1;
+      modes.forEach(m => m.classList.remove('visible'));
+      bg.style.background = MODES[currentMode].bg;
+    } else {
+      canvas.style.opacity = 0;
+      modes.forEach((m, idx) => m.classList.toggle('visible', idx === currentMode));
+      bg.style.background = MODES[currentMode].bg;
+      document.body.style.setProperty('--accent', MODES[currentMode].accent);
+      document.documentElement.style.setProperty('--accent', MODES[currentMode].accent);
+      navSpans.forEach((n, idx) => n.classList.toggle('active', idx === currentMode));
+      specsEl.querySelector('#sp0').textContent = MODES[currentMode].specs[0];
+      specsEl.querySelector('#sp1').textContent = MODES[currentMode].specs[1];
+      specsEl.querySelector('#sp2').textContent = MODES[currentMode].specs[2];
+    }
+  }
+
+  // ===== Scroll =====
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        render(window.scrollY);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // ===== Click en nav =====
+  navSpans.forEach((n) => n.addEventListener('click', () => {
+    const idx = parseInt(n.dataset.mode);
+    const targetVh = modeStartVh(idx);
+    window.scrollTo({ top: targetVh / 100 * window.innerHeight, behavior: 'smooth' });
+  }));
+
+  // ===== Redimensionar canvas =====
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    render(window.scrollY);
+  }
+  window.addEventListener('resize', resize);
+
+  // ===== init =====
+  resize();
+  render(0);
+})();
+</script>
+</body>
+</html>

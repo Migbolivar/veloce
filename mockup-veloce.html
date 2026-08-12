@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VELOCE — Concepto Hilo Rojo (mockup)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #0a0a0f; }
+  .page {
+    position: relative; width: 100%; height: 100vh; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg, #0a0a0f);
+    transition: background 1s ease;
+  }
+  /* 4 modos con fondos distintos (variantes del hilo rojo) */
+  .m-urban       { --bg: #0d1420; --accent: #4fc3f7; }
+  .m-performance { --bg: #160d14; --accent: #ff5252; }
+  .m-autonomy    { --bg: #0d1a12; --accent: #69f0ae; }
+  .m-race        { --bg: #1a0d0d; --accent: #ffb300; }
+
+  .logo {
+    position: absolute; top: 30px; left: 40px; z-index: 5;
+    font-size: 18px; letter-spacing: 5px; text-transform: uppercase;
+    color: #fff; font-weight: 700;
+  }
+  .logo small { display: block; font-size: 10px; letter-spacing: 3px; opacity: 0.6; font-weight: 300; }
+  .menu { position: absolute; top: 28px; right: 40px; z-index: 5; color: #fff; font-size: 20px; }
+
+  /* ===== Título del modo (split) ===== */
+  .mode-title {
+    position: absolute; z-index: 3; text-align: center;
+    top: 12%;
+    pointer-events: none;
+  }
+  .mode-title h1 {
+    font-size: clamp(48px, 9vw, 130px);
+    font-weight: 800; color: #fff; letter-spacing: 0.04em;
+    text-shadow: 0 0 60px var(--accent);
+  }
+  .mode-title .sub {
+    font-size: clamp(12px, 1.4vw, 18px);
+    letter-spacing: 0.5em; text-transform: uppercase;
+    color: var(--accent); margin-top: 10px;
+  }
+
+  /* ===== Auto protagonista (el Hilo Rojo: mismo auto, cambia de acabado) ===== */
+  .car {
+    position: absolute; z-index: 4;
+    width: clamp(320px, 55vw, 820px);
+    top: 38%;
+    filter: drop-shadow(0 40px 50px rgba(0,0,0,0.55));
+  }
+  .car svg { width: 100%; height: auto; display: block; }
+  /* línea de velocidad bajo el auto */
+  .speed-line {
+    position: absolute; bottom: 22%; left: 50%; transform: translateX(-50%);
+    width: 60%; height: 2px; z-index: 2;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+    animation: speedPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes speedPulse { 0%,100% { opacity: 0.2; } 50% { opacity: 0.8; } }
+
+  /* ===== Nav inferior (modos) ===== */
+  .nav-bottom {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: clamp(16px, 3vw, 40px); z-index: 6;
+  }
+  .nav-bottom span {
+    color: rgba(255,255,255,0.55); font-size: 13px;
+    letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+    padding-bottom: 6px; transition: all 0.3s;
+  }
+  .nav-bottom span:hover { color: #fff; }
+  .nav-bottom span.active { color: var(--accent); border-bottom: 2px solid var(--accent); font-weight: 700; }
+
+  /* ===== Círculo de transición (estilo ibuongiorno) ===== */
+  .big-dot {
+    position: absolute; z-index: 1;
+    width: 520px; height: 520px; border-radius: 50%;
+    background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+    opacity: 0.10; filter: blur(10px);
+    pointer-events: none;
+  }
+
+  .specs {
+    position: absolute; bottom: 40px; left: 40px; z-index: 6;
+    color: rgba(255,255,255,0.7); font-size: 11px; letter-spacing: 1.5px; line-height: 2;
+  }
+  .specs b { color: var(--accent); }
+  .langs { position: absolute; bottom: 40px; right: 40px; z-index: 6; color: rgba(255,255,255,0.5); font-size: 11px; letter-spacing: 2px; }
+
+  .note {
+    position: fixed; bottom: 6px; right: 10px; z-index: 99;
+    font-size: 10px; color: rgba(255,255,255,0.3);
+    background: rgba(0,0,0,0.5); padding: 3px 10px; border-radius: 10px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ MODO URBAN ============ -->
+<section class="page m-urban">
+  <div class="logo">VELOCE<br><small>ELECTRIC PERFORMANCE</small></div>
+  <div class="menu">☰</div>
+  <div class="big-dot"></div>
+
+  <div class="mode-title">
+    <h1>URBAN</h1>
+    <div class="sub">City Range · 480 km</div>
+  </div>
+
+  <div class="car">
+    <svg viewBox="0 0 900 300">
+      <defs>
+        <linearGradient id="v1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#3a4a6a"/><stop offset="100%" stop-color="#141c2e"/>
+        </linearGradient>
+      </defs>
+      <!-- carrocería -->
+      <path d="M60,200 L90,140 L200,120 L320,90 L560,85 L700,120 L800,150 L840,190 L780,200 L720,215 L180,218 L110,210 Z"
+            fill="url(#v1)" stroke="#4fc3f7" stroke-width="2"/>
+      <!-- ventanas -->
+      <path d="M230,122 L330,98 L420,95 L420,160 L240,160 Z" fill="#0a0f1a" opacity="0.9"/>
+      <path d="M440,95 L560,95 L640,125 L440,160 Z" fill="#0a0f1a" opacity="0.9"/>
+      <!-- ruedas -->
+      <circle cx="250" cy="215" r="42" fill="#05070c" stroke="#4fc3f7" stroke-width="2"/>
+      <circle cx="250" cy="215" r="18" fill="#1a2233"/>
+      <circle cx="660" cy="215" r="42" fill="#05070c" stroke="#4fc3f7" stroke-width="2"/>
+      <circle cx="660" cy="215" r="18" fill="#1a2233"/>
+      <!-- faro -->
+      <rect x="826" y="168" width="16" height="14" rx="3" fill="#4fc3f7"/>
+      <rect x="58" y="190" width="14" height="10" rx="2" fill="#ff5252" opacity="0.8"/>
+      <!-- luz neon bajo -->
+      <rect x="180" y="208" width="540" height="4" rx="2" fill="#4fc3f7" opacity="0.6"/>
+    </svg>
+  </div>
+  <div class="speed-line"></div>
+
+  <div class="nav-bottom">
+    <span class="active">Urban</span><span>Performance</span><span>Autonomy</span><span>Race</span>
+  </div>
+  <div class="specs"><b>0-100:</b> 4.9s<br><b>Rango:</b> 480 km<br><b>Potencia:</b> 320 kW</div>
+  <div class="langs">ES · EN · FR</div>
+</section>
+
+<!-- ============ MODO PERFORMANCE ============ -->
+<section class="page m-performance">
+  <div class="logo">VELOCE<br><small>ELECTRIC PERFORMANCE</small></div>
+  <div class="menu">☰</div>
+  <div class="big-dot"></div>
+
+  <div class="mode-title">
+    <h1>PERFORMANCE</h1>
+    <div class="sub">Sport · 0-100 en 3.2s</div>
+  </div>
+
+  <div class="car">
+    <svg viewBox="0 0 900 300">
+      <defs>
+        <linearGradient id="v2" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#7a2a2a"/><stop offset="100%" stop-color="#2a0d0d"/>
+        </linearGradient>
+      </defs>
+      <path d="M60,200 L90,140 L200,120 L320,90 L560,85 L700,120 L800,150 L840,190 L780,200 L720,215 L180,218 L110,210 Z"
+            fill="url(#v2)" stroke="#ff5252" stroke-width="2"/>
+      <path d="M230,122 L330,98 L420,95 L420,160 L240,160 Z" fill="#1a0505" opacity="0.9"/>
+      <path d="M440,95 L560,95 L640,125 L440,160 Z" fill="#1a0505" opacity="0.9"/>
+      <circle cx="250" cy="215" r="42" fill="#05070c" stroke="#ff5252" stroke-width="2"/>
+      <circle cx="250" cy="215" r="18" fill="#3a1515"/>
+      <circle cx="660" cy="215" r="42" fill="#05070c" stroke="#ff5252" stroke-width="2"/>
+      <circle cx="660" cy="215" r="18" fill="#3a1515"/>
+      <rect x="826" y="168" width="16" height="14" rx="3" fill="#ff5252"/>
+      <rect x="58" y="190" width="14" height="10" rx="2" fill="#ff5252" opacity="0.9"/>
+      <rect x="180" y="208" width="540" height="4" rx="2" fill="#ff5252" opacity="0.6"/>
+    </svg>
+  </div>
+  <div class="speed-line"></div>
+
+  <div class="nav-bottom">
+    <span>Urban</span><span class="active">Performance</span><span>Autonomy</span><span>Race</span>
+  </div>
+  <div class="specs"><b>0-100:</b> 3.2s<br><b>Rango:</b> 410 km<br><b>Potencia:</b> 480 kW</div>
+  <div class="langs">ES · EN · FR</div>
+</section>
+
+<!-- ============ MODO AUTONOMY ============ -->
+<section class="page m-autonomy">
+  <div class="logo">VELOCE<br><small>ELECTRIC PERFORMANCE</small></div>
+  <div class="menu">☰</div>
+  <div class="big-dot"></div>
+
+  <div class="mode-title">
+    <h1>AUTONOMY</h1>
+    <div class="sub">Self-driving · 620 km</div>
+  </div>
+
+  <div class="car">
+    <svg viewBox="0 0 900 300">
+      <defs>
+        <linearGradient id="v3" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#1a4a2a"/><stop offset="100%" stop-color="#0a1a10"/>
+        </linearGradient>
+      </defs>
+      <path d="M60,200 L90,140 L200,120 L320,90 L560,85 L700,120 L800,150 L840,190 L780,200 L720,215 L180,218 L110,210 Z"
+            fill="url(#v3)" stroke="#69f0ae" stroke-width="2"/>
+      <path d="M230,122 L330,98 L420,95 L420,160 L240,160 Z" fill="#05150a" opacity="0.9"/>
+      <path d="M440,95 L560,95 L640,125 L440,160 Z" fill="#05150a" opacity="0.9"/>
+      <circle cx="250" cy="215" r="42" fill="#05070c" stroke="#69f0ae" stroke-width="2"/>
+      <circle cx="250" cy="215" r="18" fill="#123a1e"/>
+      <circle cx="660" cy="215" r="42" fill="#05070c" stroke="#69f0ae" stroke-width="2"/>
+      <circle cx="660" cy="215" r="18" fill="#123a1e"/>
+      <rect x="826" y="168" width="16" height="14" rx="3" fill="#69f0ae"/>
+      <rect x="58" y="190" width="14" height="10" rx="2" fill="#69f0ae" opacity="0.7"/>
+      <rect x="180" y="208" width="540" height="4" rx="2" fill="#69f0ae" opacity="0.6"/>
+      <!-- sensor LiDAR en el techo -->
+      <rect x="420" y="78" width="20" height="14" rx="3" fill="#69f0ae" opacity="0.8"/>
+    </svg>
+  </div>
+  <div class="speed-line"></div>
+
+  <div class="nav-bottom">
+    <span>Urban</span><span>Performance</span><span class="active">Autonomy</span><span>Race</span>
+  </div>
+  <div class="specs"><b>0-100:</b> 5.6s<br><b>Rango:</b> 620 km<br><b>Potencia:</b> 280 kW</div>
+  <div class="langs">ES · EN · FR</div>
+</section>
+
+<!-- ============ MODO RACE ============ -->
+<section class="page m-race">
+  <div class="logo">VELOCE<br><small>ELECTRIC PERFORMANCE</small></div>
+  <div class="menu">☰</div>
+  <div class="big-dot"></div>
+
+  <div class="mode-title">
+    <h1>RACE</h1>
+    <div class="sub">Track · 0-100 en 2.1s</div>
+  </div>
+
+  <div class="car">
+    <svg viewBox="0 0 900 300">
+      <defs>
+        <linearGradient id="v4" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#8a6a1e"/><stop offset="100%" stop-color="#2a1a05"/>
+        </linearGradient>
+      </defs>
+      <path d="M60,200 L90,140 L200,120 L320,90 L560,85 L700,120 L800,150 L840,190 L780,200 L720,215 L180,218 L110,210 Z"
+            fill="url(#v4)" stroke="#ffb300" stroke-width="3"/>
+      <path d="M230,122 L330,98 L420,95 L420,160 L240,160 Z" fill="#1a0f02" opacity="0.9"/>
+      <path d="M440,95 L560,95 L640,125 L440,160 Z" fill="#1a0f02" opacity="0.9"/>
+      <circle cx="250" cy="215" r="42" fill="#05070c" stroke="#ffb300" stroke-width="2"/>
+      <circle cx="250" cy="215" r="18" fill="#4a3a12"/>
+      <circle cx="660" cy="215" r="42" fill="#05070c" stroke="#ffb300" stroke-width="2"/>
+      <circle cx="660" cy="215" r="18" fill="#4a3a12"/>
+      <rect x="826" y="168" width="16" height="14" rx="3" fill="#ffb300"/>
+      <rect x="58" y="190" width="14" height="10" rx="2" fill="#ffb300"/>
+      <rect x="180" y="208" width="540" height="4" rx="2" fill="#ffb300" opacity="0.7"/>
+      <!-- alerón trasero -->
+      <path d="M700,118 L780,108 L790,118 L700,126 Z" fill="#ffb300" opacity="0.7"/>
+    </svg>
+  </div>
+  <div class="speed-line"></div>
+
+  <div class="nav-bottom">
+    <span>Urban</span><span>Performance</span><span>Autonomy</span><span class="active">Race</span>
+  </div>
+  <div class="specs"><b>0-100:</b> 2.1s<br><b>Rango:</b> 350 km<br><b>Potencia:</b> 680 kW</div>
+  <div class="langs">ES · EN · FR</div>
+</section>
+
+<div class="note">MOCKUP HILO ROJO — VELOCE: 1 auto protagonista · 4 modos (cambia de acabado/color) · círculo de transición · texto split</div>
+</body>
+</html>
